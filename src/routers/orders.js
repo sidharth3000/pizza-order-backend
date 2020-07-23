@@ -2,6 +2,7 @@ const express = require('express')
 const Order = require('../models/orders')
 const auth = require('../middleware/auth')
 const router = new express.Router()
+const { sendConfirmEmail } = require('../emails/account')
 
 router.post('/orders', auth, async (req, res) => {
     const order = new Order({
@@ -11,6 +12,8 @@ router.post('/orders', auth, async (req, res) => {
 
     try {
         await order.save()
+        
+        sendConfirmEmail(order.pizza, req.user.name, req.user.email)
         res.status(201).send(order)
     } catch (e) {
         res.status(400).send(e)
